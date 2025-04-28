@@ -1,0 +1,5 @@
+prophet
+plotly
+yfinance
+flask
+pandas

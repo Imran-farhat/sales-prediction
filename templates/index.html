@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Predictor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(120deg, #2980b9, #6dd5fa, #ffffff);
+            min-height: 100vh;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+        }
+        .container {
+            max-width: 480px;
+            margin: 60px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            padding: 40px 30px 30px 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #2980b9;
+            margin-bottom: 30px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .form-section {
+            margin-bottom: 35px;
+        }
+        .form-title {
+            font-size: 1.1rem;
+            color: #444;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input[type="text"], input[type="number"], input[type="file"], input[type="date"] {
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus {
+            border: 1.5px solid #2980b9;
+        }
+        .btn {
+            background: linear-gradient(90deg, #2980b9, #6dd5fa);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            margin-top: 8px;
+            box-shadow: 0 2px 8px rgba(41,128,185,0.08);
+        }
+        .btn:hover {
+            background: linear-gradient(90deg, #2574a9, #48c6ef);
+            box-shadow: 0 4px 16px rgba(41,128,185,0.14);
+        }
+        .divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 30px 0;
+            border-radius: 2px;
+        }
+        .data-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .data-row input {
+            flex: 1;
+        }
+        .action-btn {
+            background: #f0f0f0;
+            color: #444;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .action-btn:hover {
+            background: #e0e0e0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 8px 18px 8px;
+                margin: 18px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📈 Stock Predictor</h1>
+        
+        <!-- Stock Prediction Form -->
+        <div class="form-section">
+            <div class="form-title">Predict Stock Price</div>
+            <form action="/predict" method="post" class="form-group">
+                <input type="text" name="ticker" placeholder="Stock Ticker (e.g., AAPL)" required>
+                <input type="number" name="days" min="1" max="365" placeholder="Days to Predict (e.g., 30)" required>
+                <button type="submit" class="btn">Predict</button>
+            </form>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <!-- CSV Upload Form -->
+        <div class="form-section">
+            <div class="form-title">Analyze Your Stock Data (CSV)</div>
+            <form action="/upload" method="post" enctype="multipart/form-data" class="form-group">
+                <label for="csvFile">CSV File</label>
+                <input type="file" id="csvFile" name="file" accept=".csv" required title="Upload your CSV file" placeholder="Choose CSV file">
+                <button type="submit" class="btn">Analyze CSV</button>
+            </form>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <!-- Manual Data Entry Form -->
+        <div class="form-section">
+            <div class="form-title">Manual Sales Data Prediction</div>
+            <form action="/manual_predict" method="post" id="manualForm" class="form-group">
+                <div id="dataEntries">
+                    <div class="data-row">
+                        <input type="date" name="dates[]" required placeholder="Date">
+                        <input type="number" step="0.01" name="sales[]" required placeholder="Sales Value">
+                        <button type="button" class="action-btn remove-row" onclick="removeRow(this)" disabled>-</button>
+                    </div>
+                </div>
+                <button type="button" class="action-btn" onclick="addRow()">+ Add Row</button>
+                <input type="number" name="prediction_days" min="1" max="365" value="30" placeholder="Days to Predict" required>
+                <button type="submit" class="btn">Predict Sales</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function addRow() {
+            const container = document.getElementById('dataEntries');
+            const newRow = document.createElement('div');
+            newRow.className = 'data-row';
+            newRow.innerHTML = `
+                <input type="date" name="dates[]" required placeholder="Date">
+                <input type="number" step="0.01" name="sales[]" required placeholder="Sales Value">
+                <button type="button" class="action-btn remove-row" onclick="removeRow(this)">-</button>
+            `;
+            container.appendChild(newRow);
+            
+            // Enable remove button on first row if we have more than one row
+            if (container.children.length === 2) {
+                container.querySelector('.remove-row').disabled = false;
+            }
+        }
+        
+        function removeRow(btn) {
+            const container = document.getElementById('dataEntries');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+                
+                // Disable remove button on first row if only one row remains
+                if (container.children.length === 1) {
+                    container.querySelector('.remove-row').disabled = true;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
