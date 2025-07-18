@@ -91,9 +91,17 @@
             padding: 8px 12px;
             cursor: pointer;
             font-size: 0.9rem;
-        }
-        .action-btn:hover {
+        }        .action-btn:hover {
             background: #e0e0e0;
+        }
+        .info-box {
+            background: #e8f4f8;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            border-left: 4px solid #2980b9;
         }
         @media (max-width: 600px) {
             .container {
@@ -105,11 +113,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>📈 Stock Predictor</h1>
-        
-        <!-- Stock Prediction Form -->
+        <h1>📈 Stock Predictor</h1>        <!-- Stock Prediction Form -->
         <div class="form-section">
             <div class="form-title">Predict Stock Price</div>
+            <div class="info-box">
+                <strong>Note:</strong> To avoid rate limiting, please wait at least 10 seconds between requests. Data is cached for 1 hour for faster access.
+            </div>
             <form action="/predict" method="post" class="form-group">
                 <input type="text" name="ticker" placeholder="Stock Ticker (e.g., AAPL)" required>
                 <input type="number" name="days" min="1" max="365" placeholder="Days to Predict (e.g., 30)" required>
