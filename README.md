@@ -1,103 +1,65 @@
-# Stock Predictor Application
+# 📈 StockAI: Advanced Prediction Dashboard
 
-## Overview
+StockAI is a professional-grade, Bloomberg Terminal-inspired dashboard for stock market forecasting and technical analysis. Built with Flask, it integrates multiple machine learning models and real-time data processing to provide actionable financial insights.
 
-This is a Flask-based web application that provides stock price predictions using Facebook's Prophet forecasting model. The application offers three main functionalities:
+![Dashboard Preview](file:///C:/Users/ACER/.gemini/antigravity/brain/32409471-d024-4378-b2a8-7c2030143881/verify_prediction_app_1771656070958.webp)
 
-1. **Stock Price Prediction**: Predict future stock prices by entering a stock ticker symbol and number of days to predict.
-2. **CSV Data Analysis**: Upload a CSV file with historical stock data for analysis and visualization.
-3. **Manual Data Prediction**: Enter manual sales data with dates to generate predictions.
+## 🚀 Key Features
 
-## Features
+- **Multi-Model Intelligence**: Compare predictions from **Prophet**, **ARIMA**, **LSTM**, and **Linear Regression** in one view.
+- **"Zero-API" Manual Mode**: Paste or type your own data for instant frontend forecasting without any backend overhead.
+- **Advanced Technical Indicators**: Real-time calculation of **RSI**, **MACD**, and **Bollinger Bands**.
+- **Modern Bloomberg UI**: High-contrast dark theme with interactive Plotly charts (Candlestick, Line, OHLC).
+- **Smart Data Pipeline**: File-based caching and intelligent fallback logic to handle Yahoo Finance rate limits gracefully.
+- **Watchlist & History**: Session-based persistence for tracking your favorite tickers.
 
-- Interactive web interface with responsive design
-- Real-time stock data fetching using Yahoo Finance API (yfinance)
-- Time series forecasting with Facebook's Prophet
-- Data visualization using Plotly
-- Support for both stock market data and custom CSV data
-- Manual data entry with dynamic form fields
+## 🛠️ Installation
 
-## Installation
+### Prerequisites
+- **Python 3.13** (Recommended for full ML support)
+- *Note: Python 3.14 is currently in "Limited Mode" (Prophet/LSTM disabled).*
 
-1. Clone the repository:
+### Quick Start
+1. **Clone & Install**:
    ```bash
-   git clone https://github.com/yourusername/stock-predictor.git
-   cd stock-predictor
-   ```
-
-2. Install the required dependencies:
-   ```bash
+   git clone https://github.com/yourusername/stock-prediction.git
+   cd stock-prediction
    pip install -r requirements.txt
    ```
 
-   Note: On some systems, you might need to install additional dependencies for Prophet:
-   ```bash
-   sudo apt-get install python3-dev python3-pip python3-venv
-   ```
+2. **Run the App**:
+   - **Windows**: Double-click `start.bat` (this ensures the correct Python version is used).
+   - **Manual**: `python app.py`
 
-3. Run the application:
-   ```bash
-   python app.py
-   ```
+3. **Access**: Open `http://localhost:5000` in your browser.
 
-4. Access the application in your browser at:
-   ```
-   http://localhost:5000
-   ```
+## 📖 Usage Guide
 
-## Usage
+### 1. Market Prediction
+Search for any ticker (e.g., `AAPL`, `BTC-USD`, `EURUSD=X`). Adjust the forecast horizon (up to 365 days) and select your preferred model.
 
-1. **Stock Prediction**:
-   - Enter a valid stock ticker (e.g., AAPL for Apple)
-   - Specify the number of days to predict (1-365)
-   - Click "Predict" to see the forecast
+### 2. Technical Analysis
+Switch to the **Technical Indicators** panel to view stacked RSI and MACD charts synced with historical price data.
 
-2. **CSV Analysis**:
-   - Upload a CSV file containing at least 'Date' and 'Close' columns
-   - The application will display a chart with the closing prices and moving average
+### 3. Manual Data Entry
+Navigate to the **Manual Data** section to input custom data. Use the **Paste from Clipboard** feature for tab-separated data from Excel or Google Sheets.
 
-3. **Manual Data Prediction**:
-   - Add rows with dates and corresponding sales values
-   - Specify prediction days
-   - Click "Predict Sales" to generate forecast
+### 4. CSV Upload
+Drag and drop your own CSV files. The app automatically detects `Date` and `Close` columns to generate analysis and forecasts.
 
-## File Structure
+## ⚠️ Troubleshooting & Rate Limits
 
-```
-stock-predictor/
-├── app.py               # Flask application backend
-├── requirements.txt     # Python dependencies
-├── static/              # Static files (CSS, JS, images)
-├── templates/
-│   ├── index.html       # Main application page
-│   ├── results.html     # Stock prediction results page
-│   └── csv_results.html # CSV analysis results page
-└── README.md            # This file
-```
+The app uses **Yahoo Finance** for real-time data which has strict rate limits. Our smart pipeline handles this by:
+- **Caching**: Data is cached for 1 hour to reduce API calls.
+- **Fallbacks**: If the API is blocked, the app automatically attempts a shorter 1-year window or uses expired cache.
+- **Demo Mode**: If all else fails, a high-quality sample dataset is generated for testing.
 
-## Dependencies
+## 🏗️ Architecture
 
-- Python 3.7+
-- Flask (web framework)
-- yfinance (Yahoo Finance API)
-- prophet (Facebook's forecasting tool)
-- pandas (data manipulation)
-- plotly (data visualization)
+- **Backend**: Python (Flask)
+- **Forecasting**: Prophet, Scikit-learn, Statsmodels, TensorFlow
+- **Frontend**: JavaScript (Vanilla), Plotly.js, CSS3
+- **Data Source**: yfinance API
 
-## Limitations
-
-- Stock predictions are based on historical data and may not account for sudden market changes
-- The Prophet model works best with at least several months of historical data
-- CSV files must contain specific column names ('Date' and 'Close')
-
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request with your changes.
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-## Support
-
-For issues or questions, please open an issue on the GitHub repository.
+## 📝 License
+This project is licensed under the MIT License.

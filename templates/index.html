@@ -1,192 +1,431 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Stock Predictor</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(120deg, #2980b9, #6dd5fa, #ffffff);
-            min-height: 100vh;
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-        }
-        .container {
-            max-width: 480px;
-            margin: 60px auto;
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            padding: 40px 30px 30px 30px;
-        }
-        h1 {
-            text-align: center;
-            color: #2980b9;
-            margin-bottom: 30px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-        .form-section {
-            margin-bottom: 35px;
-        }
-        .form-title {
-            font-size: 1.1rem;
-            color: #444;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        input[type="text"], input[type="number"], input[type="file"], input[type="date"] {
-            padding: 10px 12px;
-            border: 1px solid #d0d0d0;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            transition: border 0.2s;
-        }
-        input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus {
-            border: 1.5px solid #2980b9;
-        }
-        .btn {
-            background: linear-gradient(90deg, #2980b9, #6dd5fa);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s, box-shadow 0.2s;
-            margin-top: 8px;
-            box-shadow: 0 2px 8px rgba(41,128,185,0.08);
-        }
-        .btn:hover {
-            background: linear-gradient(90deg, #2574a9, #48c6ef);
-            box-shadow: 0 4px 16px rgba(41,128,185,0.14);
-        }
-        .divider {
-            height: 1px;
-            background: #e0e0e0;
-            margin: 30px 0;
-            border-radius: 2px;
-        }
-        .data-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .data-row input {
-            flex: 1;
-        }
-        .action-btn {
-            background: #f0f0f0;
-            color: #444;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }        .action-btn:hover {
-            background: #e0e0e0;
-        }
-        .info-box {
-            background: #e8f4f8;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-            color: #2c3e50;
-            border-left: 4px solid #2980b9;
-        }
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px 8px 18px 8px;
-                margin: 18px 4px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Stock Prediction Dashboard — Bloomberg-style ML-powered market forecasting using Prophet, ARIMA, Linear Regression, LSTM and Ensemble models.">
+  <title>StockAI — Prediction Dashboard</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Plotly for charts -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 </head>
+
 <body>
-    <div class="container">
-        <h1>📈 Stock Predictor</h1>        <!-- Stock Prediction Form -->
-        <div class="form-section">
-            <div class="form-title">Predict Stock Price</div>
-            <div class="info-box">
-                <strong>Note:</strong> To avoid rate limiting, please wait at least 10 seconds between requests. Data is cached for 1 hour for faster access.
+
+  <div id="toast-container"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════════════════════════ -->
+  <div class="app-shell">
+
+    <!-- ── Sidebar ─────────────────────────────────────── -->
+    <nav class="sidebar" aria-label="Main navigation">
+      <div class="sidebar-logo" title="StockAI">📈</div>
+      <div class="sidebar-nav">
+        <button class="nav-item active" data-section="dashboard" title="Dashboard" id="nav-dashboard">
+          ▦
+          <span class="tooltip">Dashboard</span>
+        </button>
+        <button class="nav-item" data-section="csv" title="CSV Upload" id="nav-csv">
+          📂
+          <span class="tooltip">CSV Upload</span>
+        </button>
+        <button class="nav-item" data-section="manual" title="Manual Data" id="nav-manual">
+          ✏️
+          <span class="tooltip">Manual Data</span>
+        </button>
+        <button class="nav-item" data-section="watchlist" title="Watchlist" id="nav-watchlist">
+          ⭐
+          <span class="tooltip">Watchlist</span>
+        </button>
+      </div>
+      <div class="sidebar-bottom">
+        <button class="nav-item" onclick="window.open('/status')" title="System Status">
+          ⚙
+          <span class="tooltip">System Status</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ── Navbar ──────────────────────────────────────── -->
+    <header class="navbar" role="banner">
+
+      <!-- Ticker Search -->
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" class="search-input" placeholder="Search ticker…" autocomplete="off"
+          spellcheck="false" aria-label="Search ticker symbol">
+        <div id="autocomplete-list" class="autocomplete-list" role="listbox"></div>
+      </div>
+
+      <!-- Days Slider -->
+      <div class="days-group">
+        <span class="days-label">Forecast</span>
+        <input type="range" id="days-slider" class="days-slider" min="0" max="5" value="1" step="1"
+          aria-label="Forecast days">
+        <span id="days-value" class="days-value">30d</span>
+      </div>
+
+      <!-- Model Selector -->
+      <select id="model-select" class="model-select" aria-label="Prediction model">
+        <option value="prophet">Prophet</option>
+        <option value="linear">Linear Reg.</option>
+        <option value="arima">ARIMA</option>
+        <option value="lstm">LSTM</option>
+        <option value="ensemble">Ensemble ⚡</option>
+      </select>
+
+      <!-- Predict Button -->
+      <button id="btn-predict" class="btn-predict" aria-label="Run prediction">
+        <span class="btn-text">⚡ Predict</span>
+        <span class="spinner"><span class="spin">↻</span> Running…</span>
+      </button>
+
+      <!-- History -->
+      <div style="position:relative">
+        <button id="history-btn" class="history-btn" aria-haspopup="true" aria-expanded="false">
+          🕐 History
+        </button>
+        <div id="history-dropdown" class="history-dropdown" role="menu">
+          <div class="history-header">Recent Searches</div>
+          <div class="history-empty">No history yet</div>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- ── Main Content ────────────────────────────────── -->
+    <main class="main" role="main">
+
+      <!-- ======== DASHBOARD SECTION ======== -->
+      <section id="section-dashboard" class="section active">
+
+        <!-- Demo Banner -->
+        <div id="demo-banner" class="demo-banner hidden" role="alert"></div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+
+          <!-- Welcome Screen (visible before first prediction) -->
+          <div id="welcome" class="welcome">
+            <h2>Stock Prediction Dashboard</h2>
+            <p>Search for a ticker above or click a suggestion below to run AI-powered price forecasting with multiple
+              models.</p>
+            <div class="suggestion-grid">
+              <div class="suggestion-card" data-ticker="AAPL">
+                <div class="s-ticker">AAPL</div>
+                <div class="s-name">Apple Inc.</div>
+              </div>
+              <div class="suggestion-card" data-ticker="GOOGL">
+                <div class="s-ticker">GOOGL</div>
+                <div class="s-name">Alphabet Inc.</div>
+              </div>
+              <div class="suggestion-card" data-ticker="MSFT">
+                <div class="s-ticker">MSFT</div>
+                <div class="s-name">Microsoft Corp.</div>
+              </div>
+              <div class="suggestion-card" data-ticker="TSLA">
+                <div class="s-ticker">TSLA</div>
+                <div class="s-name">Tesla Inc.</div>
+              </div>
+              <div class="suggestion-card" data-ticker="NVDA">
+                <div class="s-ticker">NVDA</div>
+                <div class="s-name">NVIDIA Corp.</div>
+              </div>
+              <div class="suggestion-card" data-ticker="BTC-USD">
+                <div class="s-ticker">BTC-USD</div>
+                <div class="s-name">Bitcoin</div>
+              </div>
             </div>
-            <form action="/predict" method="post" class="form-group">
-                <input type="text" name="ticker" placeholder="Stock Ticker (e.g., AAPL)" required>
-                <input type="number" name="days" min="1" max="365" placeholder="Days to Predict (e.g., 30)" required>
-                <button type="submit" class="btn">Predict</button>
-            </form>
-        </div>
-        
-        <div class="divider"></div>
-        
-        <!-- CSV Upload Form -->
-        <div class="form-section">
-            <div class="form-title">Analyze Your Stock Data (CSV)</div>
-            <form action="/upload" method="post" enctype="multipart/form-data" class="form-group">
-                <label for="csvFile">CSV File</label>
-                <input type="file" id="csvFile" name="file" accept=".csv" required title="Upload your CSV file" placeholder="Choose CSV file">
-                <button type="submit" class="btn">Analyze CSV</button>
-            </form>
-        </div>
-        
-        <div class="divider"></div>
-        
-        <!-- Manual Data Entry Form -->
-        <div class="form-section">
-            <div class="form-title">Manual Sales Data Prediction</div>
-            <form action="/manual_predict" method="post" id="manualForm" class="form-group">
-                <div id="dataEntries">
-                    <div class="data-row">
-                        <input type="date" name="dates[]" required placeholder="Date">
-                        <input type="number" step="0.01" name="sales[]" required placeholder="Sales Value">
-                        <button type="button" class="action-btn remove-row" onclick="removeRow(this)" disabled>-</button>
-                    </div>
+          </div>
+
+          <!-- Panel 1: Main Chart (spans 2 cols) -->
+          <div class="panel panel-chart" id="panel-main-chart">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="dot"></span>
+                <span id="chart-title">Price Chart &amp; Prediction</span>
+              </div>
+              <div class="panel-actions">
+                <div class="chart-toggle" role="group" aria-label="Chart type">
+                  <button data-mode="line" class="active" onclick="setChartMode('line')">Line</button>
+                  <button data-mode="candlestick" onclick="setChartMode('candlestick')">Candle</button>
+                  <button data-mode="ohlc" onclick="setChartMode('ohlc')">OHLC</button>
                 </div>
-                <button type="button" class="action-btn" onclick="addRow()">+ Add Row</button>
-                <input type="number" name="prediction_days" min="1" max="365" value="30" placeholder="Days to Predict" required>
-                <button type="submit" class="btn">Predict Sales</button>
-            </form>
+                <button id="btn-watchlist-main" class="btn-watchlist" data-ticker="">☆ Watchlist</button>
+                <button class="btn btn-sm" onclick="openModal()">⛶ Expand</button>
+              </div>
+            </div>
+            <div class="panel-body no-pad" style="min-height:340px;position:relative">
+              <div class="skeleton-wrap" style="padding:16px;display:none">
+                <div class="skeleton skeleton-chart"></div>
+              </div>
+              <div class="chart-wrap" style="height:340px">
+                <div id="main-chart" style="width:100%;height:100%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel: Stats Cards (right column, spans 2 rows) -->
+          <div class="panel panel-stats" id="panel-stats">
+            <div class="panel-header">
+              <div class="panel-title"><span class="dot" style="background:var(--accent)"></span> Key Stats</div>
+              <div class="panel-actions">
+                <button class="btn btn-sm" onclick="downloadCSV()">⬇ CSV</button>
+                <button class="btn btn-sm" onclick="downloadPNG()">🖼 PNG</button>
+                <button class="btn btn-sm modal-actions" onclick="shareURL()">🔗 Share</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="stats-wrap">
+                <div class="stats-grid">
+                  <!-- Current Price -->
+                  <div class="stat-card" id="stat-current">
+                    <div class="stat-label">Current Price</div>
+                    <div class="stat-value">—</div>
+                    <div class="stat-sub text-muted">Live</div>
+                  </div>
+                  <!-- Predicted Price -->
+                  <div class="stat-card" id="stat-predicted">
+                    <div class="stat-label">Predicted Price</div>
+                    <div class="stat-value">—</div>
+                    <div class="stat-sub text-muted">End of period</div>
+                  </div>
+                  <!-- % Change -->
+                  <div class="stat-card" id="stat-pct">
+                    <div class="stat-label">Expected Change</div>
+                    <div class="stat-value">—</div>
+                    <div class="stat-badge">—</div>
+                  </div>
+                  <!-- Confidence -->
+                  <div class="stat-card" id="stat-conf">
+                    <div class="stat-label">Model Confidence</div>
+                    <div class="stat-value">—</div>
+                    <div class="confidence-bar">
+                      <div class="confidence-fill" style="width:0%"></div>
+                    </div>
+                  </div>
+                  <!-- Model Used -->
+                  <div class="stat-card" id="stat-model">
+                    <div class="stat-label">Model</div>
+                    <div class="stat-value" style="font-size:16px">—</div>
+                    <div class="stat-sub">RMSE: — &nbsp; MAE: —</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 2: RSI + MACD -->
+          <div class="panel" id="panel-indicators">
+            <div class="panel-header">
+              <div class="panel-title"><span class="dot" style="background:var(--accent3)"></span> Technical Indicators
+              </div>
+              <div class="panel-actions">
+                <span class="pill blue" style="font-size:10px">RSI · MACD</span>
+              </div>
+            </div>
+            <div class="panel-body no-pad" style="min-height:280px;position:relative">
+              <div class="skeleton-wrap" style="padding:16px;display:none">
+                <div class="skeleton skeleton-chart" style="height:260px"></div>
+              </div>
+              <div class="chart-wrap" style="height:280px">
+                <div id="technical-chart" style="width:100%;height:100%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 3: Model Accuracy Comparison -->
+          <div class="panel" id="panel-compare">
+            <div class="panel-header">
+              <div class="panel-title"><span class="dot" style="background:var(--warn)"></span> Model Accuracy (RMSE)
+              </div>
+              <div class="panel-actions">
+                <span class="pill" style="font-size:10px">Lower = Better</span>
+              </div>
+            </div>
+            <div class="panel-body no-pad" style="min-height:240px">
+              <div class="chart-wrap" style="height:240px">
+                <div id="rmse-chart" style="width:100%;height:100%"></div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /dashboard-grid -->
+      </section>
+
+      <!-- ======== CSV UPLOAD SECTION ======== -->
+      <section id="section-csv" class="section">
+        <div class="page-header">
+          <div>
+            <div class="page-title">📂 CSV Upload</div>
+            <div class="page-sub">Upload your own historical price data for prediction</div>
+          </div>
         </div>
+
+        <!-- Drop zone -->
+        <div id="csv-dropzone" class="dropzone">
+          <input type="file" id="csv-file-input" accept=".csv" aria-label="Upload CSV file">
+          <span class="dropzone-icon">📊</span>
+          <div class="dropzone-text">Drop your CSV file here</div>
+          <div class="dropzone-sub">or click to browse &nbsp;·&nbsp; .CSV files only</div>
+        </div>
+
+        <!-- Column mapping message (shown if auto-detect fails) -->
+        <div id="col-map" class="hidden mt-4"></div>
+
+        <!-- Preview -->
+        <div id="csv-preview" class="hidden mt-4">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="dot"></span> File Preview</div>
+            </div>
+            <div class="panel-body">
+              <div id="csv-table-wrap" class="preview-table-wrap"></div>
+              <div class="flex gap-2 mt-3">
+                <div class="form-group" style="flex:0 0 180px;margin:0">
+                  <label class="form-label" for="csv-days">Forecast Days</label>
+                  <select id="csv-days" class="form-select">
+                    <option value="30">30 days</option>
+                    <option value="60">60 days</option>
+                    <option value="90">90 days</option>
+                    <option value="180">180 days</option>
+                  </select>
+                </div>
+                <div class="form-group" style="flex:0 0 180px;margin:0">
+                  <label class="form-label" for="csv-model">Model</label>
+                  <select id="csv-model" class="form-select">
+                    <option value="prophet">Prophet</option>
+                    <option value="linear">Linear Reg.</option>
+                    <option value="arima">ARIMA</option>
+                    <option value="ensemble">Ensemble</option>
+                  </select>
+                </div>
+                <div style="display:flex;align-items:flex-end">
+                  <button id="btn-csv-predict" class="btn btn-primary">⚡ Run Prediction</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======== MANUAL DATA SECTION ======== -->
+      <section id="section-manual" class="section">
+        <div class="page-header">
+          <div>
+            <div class="page-title">✏️ Manual Data Entry</div>
+            <div class="page-sub">Enter or paste your own time-series data</div>
+          </div>
+          <div class="flex gap-2">
+            <button id="btn-paste-clipboard" class="btn">📋 Paste from Clipboard</button>
+            <button id="btn-add-row" class="btn">+ Add Row</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <!-- Table -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="dot"></span> Data Table</div>
+            </div>
+            <div class="panel-body">
+              <div class="manual-table-wrap">
+                <table class="manual-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Price / Value</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="manual-table-body">
+                    <tr>
+                      <td><input type="date" class="manual-date"></td>
+                      <td><input type="number" step="0.01" class="manual-price" placeholder="0.00"></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td><input type="date" class="manual-date"></td>
+                      <td><input type="number" step="0.01" class="manual-price" placeholder="0.00"></td>
+                      <td><button class="btn btn-sm btn-danger"
+                          onclick="this.closest('tr').remove();updateManualPreview()">✕</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="flex gap-2 mt-3">
+                <div class="form-group" style="flex:0 0 150px;margin:0">
+                  <label class="form-label">Forecast Days</label>
+                  <input type="number" id="manual-days" class="form-input" value="30" min="1" max="365">
+                </div>
+                <div class="form-group" style="flex:0 0 170px;margin:0">
+                  <label class="form-label">Model</label>
+                  <select id="manual-model" class="form-select">
+                    <option value="prophet">Prophet</option>
+                    <option value="linear">Linear Reg.</option>
+                    <option value="arima">ARIMA</option>
+                    <option value="ensemble">Ensemble</option>
+                  </select>
+                </div>
+                <div style="display:flex;align-items:flex-end">
+                  <button id="btn-manual-predict" class="btn btn-primary">⚡ Predict</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Live Preview Chart -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="dot"></span> Live Preview</div>
+            </div>
+            <div class="panel-body no-pad" style="height:260px">
+              <div id="manual-preview-chart" style="width:100%;height:100%"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======== WATCHLIST SECTION ======== -->
+      <section id="section-watchlist" class="section">
+        <div class="page-header">
+          <div>
+            <div class="page-title">⭐ Watchlist</div>
+            <div class="page-sub">Click any ticker to re-run prediction</div>
+          </div>
+        </div>
+        <div class="watchlist-panel">
+          <div id="watchlist-container">
+            <div class="wl-empty">No tickers in watchlist.<br><small>Click "☆ Watchlist" in the chart panel after a
+                prediction.</small></div>
+          </div>
+        </div>
+      </section>
+
+    </main><!-- /main -->
+  </div><!-- /app-shell -->
+
+  <!-- ── Slide-up Modal ──────────────────────────────────────── -->
+  <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title">Prediction Chart</div>
+        <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+      </div>
+      <div style="height:400px">
+        <div id="modal-chart" style="width:100%;height:100%"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="downloadPNG()">🖼 Download PNG</button>
+        <button class="btn" onclick="downloadCSV()">⬇ Download CSV</button>
+        <button class="btn btn-share" onclick="shareURL()">🔗 Share URL</button>
+      </div>
     </div>
-    
-    <script>
-        function addRow() {
-            const container = document.getElementById('dataEntries');
-            const newRow = document.createElement('div');
-            newRow.className = 'data-row';
-            newRow.innerHTML = `
-                <input type="date" name="dates[]" required placeholder="Date">
-                <input type="number" step="0.01" name="sales[]" required placeholder="Sales Value">
-                <button type="button" class="action-btn remove-row" onclick="removeRow(this)">-</button>
-            `;
-            container.appendChild(newRow);
-            
-            // Enable remove button on first row if we have more than one row
-            if (container.children.length === 2) {
-                container.querySelector('.remove-row').disabled = false;
-            }
-        }
-        
-        function removeRow(btn) {
-            const container = document.getElementById('dataEntries');
-            if (container.children.length > 1) {
-                btn.parentElement.remove();
-                
-                // Disable remove button on first row if only one row remains
-                if (container.children.length === 1) {
-                    container.querySelector('.remove-row').disabled = true;
-                }
-            }
-        }
-    </script>
+  </div>
+
+  <script src="/static/js/app.js"></script>
 </body>
+
 </html>

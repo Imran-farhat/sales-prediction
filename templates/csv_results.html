@@ -1,60 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Data Analysis</title>
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
+    <title>CSV Analysis — StockAI</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         body {
-            background: linear-gradient(120deg, #2980b9, #6dd5fa, #ffffff);
-            min-height: 100vh;
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
+            padding: 24px;
         }
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            padding: 30px 20px;
+
+        .results-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        h2 {
-            text-align: center;
-            color: #2980b9;
+
+        .graph-wrap {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius2);
+            padding: 8px;
             margin-bottom: 20px;
-            font-weight: 700;
-        }
-        .graph-container {
-            margin-top: 15px;
-        }
-        .back-link {
-            display: inline-block;
-            margin: 18px 0 0 0;
-            color: #2980b9;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-        .back-link:hover {
-            color: #2574a9;
-        }
-        @media (max-width: 900px) {
-            .container {
-                max-width: 98vw;
-                padding: 10px 2vw;
-            }
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h2>CSV Data Analysis</h2>
-        <div class="graph-container">
+    <div class="results-wrap">
+        <div class="page-header">
+            <div>
+                <div class="page-title">📊 CSV Data Analysis</div>
+                <div class="page-sub">Close price with 20-day moving average</div>
+            </div>
+            <a href="/" class="btn">← Back to Dashboard</a>
+        </div>
+        <div class="graph-wrap">
             {{ csv_graph|safe }}
         </div>
-        <a href="/" class="back-link">&larr; Back to Home</a>
+        <div class="flex gap-2">
+            <a href="/" class="btn btn-primary">⚡ New Prediction</a>
+            <button class="btn" onclick="window.print()">🖨 Print / PDF</button>
+        </div>
     </div>
+    <script src="/static/js/app.js"></script>
 </body>
+
 </html>

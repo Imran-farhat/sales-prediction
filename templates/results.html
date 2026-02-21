@@ -1,60 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ ticker }} Prediction</title>
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
+    <title>Prediction Results — StockAI</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         body {
-            background: linear-gradient(120deg, #2980b9, #6dd5fa, #ffffff);
-            min-height: 100vh;
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
+            padding: 24px;
         }
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            padding: 30px 20px;
+
+        .results-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        h2 {
-            text-align: center;
-            color: #2980b9;
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .results-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
             margin-bottom: 20px;
-            font-weight: 700;
         }
-        .graph-container {
-            margin-top: 15px;
+
+        .graph-wrap {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius2);
+            padding: 8px;
+            margin-bottom: 20px;
         }
-        .back-link {
-            display: inline-block;
-            margin: 18px 0 0 0;
-            color: #2980b9;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-        .back-link:hover {
-            color: #2574a9;
-        }
-        @media (max-width: 900px) {
-            .container {
-                max-width: 98vw;
-                padding: 10px 2vw;
-            }
+
+        .back-btn {
+            font-size: 13px;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h2>{{ ticker.upper() }} {{ days }}-Day Price Prediction</h2>
-        <div class="graph-container">
+    <div id="toast-container"></div>
+    <div class="results-wrap">
+        <div class="results-header">
+            <div>
+                <div class="page-title">
+                    📊 {{ ticker }} — Prediction Results
+                </div>
+                <div class="page-sub">{{ days }}-day forecast{% if model %} using {{ model }}{% endif %}</div>
+            </div>
+            <a href="/" class="btn back-btn">← Back to Dashboard</a>
+        </div>
+
+        <!-- Accuracy metrics if available -->
+        {% if rmse is defined and rmse %}
+        <div class="results-meta">
+            <span class="pill blue">Model: {{ model or 'Prophet' }}</span>
+            <span class="pill green">RMSE: {{ rmse }}</span>
+            <span class="pill purple">MAE: {{ mae }}</span>
+            <span class="pill">Horizon: {{ days }} days</span>
+        </div>
+        {% endif %}
+
+        <!-- Chart -->
+        <div class="graph-wrap">
             {{ graph|safe }}
         </div>
-        <a href="/" class="back-link">&larr; Back to Home</a>
+
+        <!-- Action buttons -->
+        <div class="flex gap-2 mt-3">
+            <a href="/" class="btn btn-primary">⚡ New Prediction</a>
+            <button class="btn" onclick="window.print()">🖨 Print / PDF</button>
+        </div>
     </div>
+    <script src="/static/js/app.js"></script>
 </body>
+
 </html>
